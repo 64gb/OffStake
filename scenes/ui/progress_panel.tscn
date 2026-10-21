@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://progress001"]
+
+[node name="ProgressPanel" type="Panel"]
+visible = false
+offset_left = 240.0
+offset_top = 100.0
+offset_right = 1040.0
+offset_bottom = 600.0
+
+[node name="Background" type="ColorRect" parent="."]
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 795.0
+offset_bottom = 495.0
+color = Color(0.15, 0.15, 0.2, 0.98)
+
+[node name="CloseButton" type="Button" parent="."]
+offset_left = 680.0
+offset_top = 10.0
+offset_right = 780.0
+offset_bottom = 35.0
+text = "Закрыть"
+
+[node name="Tabs" type="TabContainer" parent="."]
+offset_left = 20.0
+offset_top = 50.0
+offset_right = 780.0
+offset_bottom = 480.0
+
+[node name="SystemTab" type="Control" parent="Tabs"]
+text = "Система"
+
+[node name="QueueTab" type="Control" parent="Tabs"]
+text = "Очередь"
+
+[node name="BoostsTab" type="Control" parent="Tabs"]
+text = "Бусты"
+
+[node name="EmployeesTab" type="Control" parent="Tabs"]
+text = "Сотрудники"

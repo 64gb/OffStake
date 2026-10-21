@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://visitor001"]
+
+[ext_resource type="Script" path="res://scripts/visitor.gd" id="1_visitor"]
+
+[node name="Visitor" type="CharacterBody2D"]
+script = ExtResource("1_visitor")
+collision_layer = 0
+collision_mask = 0
+
+[node name="AnimatedSprite" type="AnimatedSprite2D" parent="."]
