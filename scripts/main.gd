@@ -91,6 +91,17 @@ var boost_definitions: Dictionary = {
 	"promotion": {"name": "Повышение", "cost": 100, "multiplier": 0.0, "duration": 420.0}
 }
 
+# Базовые цены бустов (до подорожания) — нужны для расчёта текущей цены
+var boost_base_costs: Dictionary = {}
+# Счётчик покупок каждого буста — цена растёт в 1.5 раза за покупку
+var boost_purchase_counts: Dictionary = {}
+
+## Текущая цена буста: базовая цена * 1.5^(число покупок), округление вверх
+func get_boost_cost(boost_id: String) -> int:
+	var base = boost_base_costs.get(boost_id, boost_definitions[boost_id].cost)
+	var count = boost_purchase_counts.get(boost_id, 0)
+	return int(ceil(base * pow(1.5, count)))
+
 # Очередь
 var max_queue_size: int = 2  # Максимум мест в очереди
 var queue_upgrades: Array = [
@@ -287,6 +298,10 @@ var office_decor_system = OfficeDecor.new()
 var decor_slots: Dictionary = {}  # {decor_id: Node} — слоты из сцены
 
 func _ready() -> void:
+	# Инициализируем базовые цены бустов (для расчёта подорожания x1.5 за покупку)
+	for bid in boost_definitions.keys():
+		boost_base_costs[bid] = boost_definitions[bid].cost
+
 	# Инфомат
 	var infomat = INFOMAT_SCENE.instantiate()
 	add_child(infomat)
@@ -900,19 +915,20 @@ func _fill_boosts_tab(ui: Node) -> void:
 
 		# Проверяем активен ли этот буст
 		var is_active = (active_boost == boost_id)
+		var cost = get_boost_cost(boost_id)
 		if is_active:
 			btn.text = "%s OK (%.0f сек)" % [boost.name, active_boost_time]
 			btn.disabled = true
 		elif active_boost != "":
 			# Другой буст активен — показываем что заменит
-			btn.text = "%s - %d XP (%d сек) [заменит %s]" % [boost.name, boost.cost, int(boost.duration), boost_definitions[active_boost].name]
-			if xp < boost.cost:
+			btn.text = "%s - %d XP (%d сек) [заменит %s]" % [boost.name, cost, int(boost.duration), boost_definitions[active_boost].name]
+			if xp < cost:
 				btn.disabled = true
 			else:
 				btn.pressed.connect(_on_activate_boost.bind(boost_id))
 		else:
-			btn.text = "%s - %d XP (%d сек)" % [boost.name, boost.cost, int(boost.duration)]
-			if xp < boost.cost:
+			btn.text = "%s - %d XP (%d сек)" % [boost.name, cost, int(boost.duration)]
+			if xp < cost:
 				btn.disabled = true
 			else:
 				btn.pressed.connect(_on_activate_boost.bind(boost_id))
@@ -1763,10 +1779,12 @@ func activate_boost(boost_id: String) -> bool:
 		return false
 
 	var boost = boost_definitions[boost_id]
-	if xp < boost.cost:
+	var cost = get_boost_cost(boost_id)
+	if xp < cost:
 		return false
 
-	xp -= boost.cost
+	xp -= cost
+	boost_purchase_counts[boost_id] = boost_purchase_counts.get(boost_id, 0) + 1
 
 	# Заменяем старый буст на новый (если был активен — теряется)
 	var old_name = ""
@@ -1924,6 +1942,10 @@ func _load_progress() -> void:
 		if SaveSystem.data.has("office_decor"):
 			office_decor_system.load_decor_data(SaveSystem.data.office_decor)
 
+		# Загружаем счётчики покупок бустов (цены растут x1.5 за покупку)
+		if SaveSystem.data.has("boost_purchase_counts"):
+			boost_purchase_counts = SaveSystem.data.boost_purchase_counts
+
 		# Обновляем UI после загрузки
 		_update_ui()
 		_update_waiting_chairs()
@@ -1953,6 +1975,7 @@ func _save_progress() -> void:
 	SaveSystem.data.employee_cost = employee_cost
 	SaveSystem.data.achievements = achievements_system.get_unlocked()
 	SaveSystem.data.office_decor = office_decor_system.get_decor_data_for_save()
+	SaveSystem.data.boost_purchase_counts = boost_purchase_counts
 	SaveSystem.save_game()
 
 func _check_achievements() -> void:

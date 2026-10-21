@@ -24,6 +24,7 @@ static var data: Dictionary = {
 	"employee_cost": 150,
 	"achievements": [],
 	"office_decor": {},
+	"boost_purchase_counts": {},
 }
 
 
@@ -83,6 +84,8 @@ static func load_game() -> bool:
 		data.employee_cost = loaded_data.employee_cost
 	if loaded_data.has("office_decor"):
 		data.office_decor = loaded_data.office_decor
+	if loaded_data.has("boost_purchase_counts"):
+		data.boost_purchase_counts = loaded_data.boost_purchase_counts
 
 	print("[SaveSystem] Игра загружена: XP=", data.xp, ", уровень=", data.system_level)
 	return true
@@ -128,4 +131,5 @@ static func reset_data() -> void:
 		"employee_cost": 150,
 		"achievements": [],
 		"office_decor": {},
+		"boost_purchase_counts": {},
 	}
