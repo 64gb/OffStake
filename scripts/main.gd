@@ -88,7 +88,7 @@ var boost_definitions: Dictionary = {
 	"energy": {"name": "Энергетик", "cost": 40, "multiplier": 0.6, "duration": 120.0},
 	"training": {"name": "Обучение", "cost": 50, "multiplier": 0.5, "duration": 180.0},
 	"praise": {"name": "Похвала", "cost": 70, "multiplier": 0.25, "duration": 300.0},
-	"promotion": {"name": "Повышение", "cost": 100, "multiplier": 0.0, "duration": 420.0}
+	"promotion": {"name": "Повышение", "cost": 100, "multiplier": 0.15, "duration": 420.0}
 }
 
 # Очередь
