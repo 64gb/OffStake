@@ -1,0 +1,143 @@
+[gd_scene format=3 uid="uid://ui001"]
+
+[node name="UI" type="CanvasLayer" unique_id=522531316]
+layer = 10
+
+[node name="XPLabel" type="Label" parent="." unique_id=732082138]
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 150.0
+offset_bottom = 35.0
+theme_override_font_sizes/font_size = 20
+text = "XP: 0"
+
+[node name="ServedLabel" type="Label" parent="." unique_id=1564923842]
+offset_left = 10.0
+offset_top = 40.0
+offset_right = 200.0
+offset_bottom = 65.0
+theme_override_font_sizes/font_size = 16
+text = "Обслужено: 0"
+
+[node name="ReputationLabel" type="Label" parent="." unique_id=933653694]
+offset_left = 10.0
+offset_top = 65.0
+offset_right = 250.0
+offset_bottom = 90.0
+theme_override_font_sizes/font_size = 14
+text = "Репутация: 50 ★★★☆☆"
+
+[node name="ServiceTimeLabel" type="Label" parent="." unique_id=933653693]
+offset_left = 10.0
+offset_top = 95.0
+offset_right = 200.0
+offset_bottom = 120.0
+theme_override_font_sizes/font_size = 14
+text = "Время: 180 сек"
+
+[node name="BoostTimerLabel" type="Label" parent="." unique_id=645489484]
+offset_left = 220.0
+offset_top = 40.0
+offset_right = 400.0
+offset_bottom = 65.0
+theme_override_font_sizes/font_size = 14
+
+[node name="MenuButton" type="Button" parent="." unique_id=658444605]
+offset_left = 10.0
+offset_top = 680.0
+offset_right = 100.0
+offset_bottom = 710.0
+text = "☰"
+
+[node name="PauseButton" type="Button" parent="." unique_id=1566267519]
+offset_left = 1170.0
+offset_top = 680.0
+offset_right = 1270.0
+offset_bottom = 710.0
+text = "⏸"
+
+[node name="ProgressButton" type="Button" parent="." unique_id=248718353]
+offset_left = 540.0
+offset_top = 10.0
+offset_right = 740.0
+offset_bottom = 35.0
+text = "📊 Прогресс"
+
+[node name="PauseMenu" type="Panel" parent="." unique_id=925062757]
+visible = false
+offset_left = 440.0
+offset_top = 260.0
+offset_right = 840.0
+offset_bottom = 500.0
+
+[node name="Background" type="ColorRect" parent="PauseMenu" unique_id=1670346414]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 395.0
+offset_bottom = 235.0
+color = Color(0.2, 0.2, 0.2, 0.95)
+
+[node name="Title" type="Label" parent="PauseMenu" unique_id=235889182]
+layout_mode = 0
+offset_left = 150.0
+offset_top = 30.0
+offset_right = 250.0
+offset_bottom = 55.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "ПАУЗА"
+horizontal_alignment = 2
+
+[node name="ResumeButton" type="Button" parent="PauseMenu" unique_id=282637422]
+layout_mode = 0
+offset_left = 125.0
+offset_top = 80.0
+offset_right = 275.0
+offset_bottom = 115.0
+text = "Продолжить"
+
+[node name="ExitButton" type="Button" parent="PauseMenu" unique_id=1507739433]
+layout_mode = 0
+offset_left = 125.0
+offset_top = 130.0
+offset_right = 275.0
+offset_bottom = 165.0
+text = "Выйти"
+
+[node name="DeleteSaveButton" type="Button" parent="PauseMenu" unique_id=1507739434]
+layout_mode = 0
+offset_left = 125.0
+offset_top = 175.0
+offset_right = 275.0
+offset_bottom = 205.0
+text = "🗑 Удалить сохранение"
+
+[node name="ProgressPanel" type="Panel" parent="." unique_id=735329906]
+visible = false
+offset_left = 240.0
+offset_top = 100.0
+offset_right = 1040.0
+offset_bottom = 600.0
+
+[node name="Background" type="ColorRect" parent="ProgressPanel" unique_id=990162865]
+layout_mode = 0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 795.0
+offset_bottom = 495.0
+color = Color(0.15, 0.15, 0.2, 0.98)
+
+[node name="Tabs" type="TabContainer" parent="ProgressPanel" unique_id=929053943]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 10.0
+offset_right = 520.0
+offset_bottom = 480.0
+
+[node name="CloseButton" type="Button" parent="ProgressPanel" unique_id=409082688]
+layout_mode = 0
+offset_left = 695.0
+offset_top = 450.0
+offset_right = 795.0
+offset_bottom = 480.0
+text = "Закрыть"
