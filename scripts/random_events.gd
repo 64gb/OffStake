@@ -137,27 +137,30 @@ func _pick_event(reputation: int) -> Dictionary:
 
 	# Выбираем категорию по репутации
 	var pool = []
+	# Один бросок на выбор категории (раньше использовались повторные randf() в elif,
+	# из-за чего реальные вероятности не совпадали с заявленными в комментариях)
+	var roll = randf()
 	if reputation >= 60:
 		# 60% хорошие, 10% плохие, 30% нейтральные
-		if randf() < 0.6 and good_events.size() > 0:
+		if roll < 0.60 and good_events.size() > 0:
 			pool = good_events
-		elif randf() < 0.25 and bad_events.size() > 0:
+		elif roll < 0.70 and bad_events.size() > 0:
 			pool = bad_events
 		elif neutral_events.size() > 0:
 			pool = neutral_events
 	elif reputation <= 40:
 		# 15% хорошие, 55% плохие, 30% нейтральные
-		if randf() < 0.15 and good_events.size() > 0:
+		if roll < 0.15 and good_events.size() > 0:
 			pool = good_events
-		elif randf() < 0.65 and bad_events.size() > 0:
+		elif roll < 0.70 and bad_events.size() > 0:
 			pool = bad_events
 		elif neutral_events.size() > 0:
 			pool = neutral_events
 	else:
 		# Нейтральная зона: 25% хорошие, 25% плохие, 50% нейтральные
-		if randf() < 0.25 and good_events.size() > 0:
+		if roll < 0.25 and good_events.size() > 0:
 			pool = good_events
-		elif randf() < 0.33 and bad_events.size() > 0:
+		elif roll < 0.50 and bad_events.size() > 0:
 			pool = bad_events
 		elif neutral_events.size() > 0:
 			pool = neutral_events

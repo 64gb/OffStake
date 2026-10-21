@@ -86,10 +86,15 @@ var active_boost_time: float = 0.0  # Оставшееся время
 var boost_definitions: Dictionary = {
 	"coffee": {"name": "Кофе", "cost": 20, "multiplier": 0.8, "duration": 60.0},
 	"energy": {"name": "Энергетик", "cost": 40, "multiplier": 0.6, "duration": 120.0},
-	"training": {"name": "Обучение", "cost": 50, "multiplier": 0.5, "duration": 180.0},
-	"praise": {"name": "Похвала", "cost": 70, "multiplier": 0.25, "duration": 300.0},
-	"promotion": {"name": "Повышение", "cost": 100, "multiplier": 0.0, "duration": 420.0}
+	"training": {"name": "Обучение", "cost": 50, "multiplier": 0.75, "duration": 180.0},
+	"praise": {"name": "Похвала", "cost": 70, "multiplier": 0.3, "duration": 300.0},
+	# multiplier — множитель ко ВРЕМЕНИ обслуживания (0.25 = в 4 раза быстрее).
+	# 0.0 делать нельзя: обслуживание становилось мгновенным (7 минут халявы за 100 XP)
+	"promotion": {"name": "Повышение", "cost": 100, "multiplier": 0.25, "duration": 420.0}
 }
+
+# Штраф к времени обслуживания от негативных событий (сек), сбрасывается после применения
+var event_service_penalty: float = 0.0
 
 # Базовые цены бустов (до подорожания) — нужны для расчёта текущей цены
 var boost_base_costs: Dictionary = {}
@@ -893,7 +898,7 @@ func _fill_boosts_tab(ui: Node) -> void:
 
 	if active_boost != "":
 		var b = boost_definitions[active_boost]
-		active_label.text = "[!] АКТИВЕН: %s — %.0f сек\nМножитель: x%.2f" % [b.name, active_boost_time, 1.0 - b.multiplier]
+		active_label.text = "[!] АКТИВЕН: %s — %.0f сек\nВремя обслуживания: x%.2f (%.0f%% быстрее)" % [b.name, active_boost_time, b.multiplier, (1.0 - b.multiplier) * 100]
 		active_label.add_theme_color_override("font_color", Color(1, 0.9, 0.3, 1))
 	else:
 		active_label.text = "[!] Нет активного буста"
@@ -1610,6 +1615,10 @@ func _employee_at_cabinet(employee: Node) -> void:
 	var decor_bonus = office_decor_system.get_xp_bonus_multiplier()
 	var total_xp = int(xp_reward * decor_bonus)
 	xp += total_xp
+	# Штраф от события «Сбой системы» применяется к одному обслуживанию и снимается
+	if event_service_penalty > 0.0:
+		print("  Штраф +%.0f сек применён, событие исчерпано" % event_service_penalty)
+		event_service_penalty = 0.0
 	_update_ui()
 	var vip_tag = " *VIP" if is_vip else ""
 	print("XP: %d (+%d за тип %s%s%s)" % [xp, total_xp, ["Простой", "Средний", "Сложный"][visitor_type], vip_tag,
@@ -1771,6 +1780,10 @@ func get_service_time() -> float:
 		boost_multiplier = boost_definitions[active_boost].multiplier
 
 	base_time *= boost_multiplier
+	
+	# Штраф от негативных событий (например «Сбой системы»: следующее обслуживание дольше)
+	if event_service_penalty > 0.0:
+		base_time += event_service_penalty
 	
 	return max(base_time, 5.0)  # Минимум 5 секунд
 
@@ -2011,8 +2024,9 @@ func _trigger_event(event: Dictionary) -> void:
 	if event.has("rep") and event.rep != 0:
 		reputation = clamp(reputation + event.rep, 0, 100)
 
-	# Штраф к времени обслуживания
+	# Штраф к времени обслуживания (применяется к следующему обслуженному посетителю)
 	if event.has("service_penalty") and event.service_penalty > 0:
+		event_service_penalty += event.service_penalty
 		print("  Штраф к обслуживанию: +%d сек" % event.service_penalty)
 
 	_update_ui()
