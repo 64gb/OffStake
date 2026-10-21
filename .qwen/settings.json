@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(del *)",
+      "Bash(mkdir *)",
+      "Bash(rmdir *)",
+      "Bash(godot *)",
+      "Bash(where *)",
+      "Bash(dir *)",
+      "Bash(powershell *)",
+      "Bash(sed *)",
+      "Bash(xcopy *)",
+      "Bash(findstr *)"
+    ]
+  },
+  "$version": 3
+}

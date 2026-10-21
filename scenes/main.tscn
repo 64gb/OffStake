@@ -1,0 +1,269 @@
+[gd_scene format=3 uid="uid://main001"]
+
+[ext_resource type="Script" uid="uid://doehy00uixscx" path="res://scripts/main.gd" id="1_main"]
+[ext_resource type="PackedScene" uid="uid://ui001" path="res://scenes/ui/ui.tscn" id="2_ui"]
+[ext_resource type="PackedScene" path="res://scenes/office/decor_slot.tscn" id="3_decor_slot"]
+[ext_resource type="Texture2D" uid="uid://cyg0iatb1nuv5" path="res://assets/office/шкаф.png" id="4_cabinet"]
+[ext_resource type="Texture2D" uid="uid://do6g02eqk067p" path="res://assets/office/float.png" id="5_floor"]
+[ext_resource type="Texture2D" uid="uid://iegff1ctkkma" path="res://assets/office/long_wall.png" id="6_wall"]
+[ext_resource type="Texture2D" uid="uid://dlhlkkewc8xti" path="res://assets/office/door_close.png" id="7_door_close"]
+
+[node name="Main" type="Node2D" unique_id=35511378]
+script = ExtResource("1_main")
+
+[node name="Floor_Left_4" type="Sprite2D" parent="." unique_id=2050907241]
+position = Vector2(120.85633, 384.2922)
+scale = Vector2(0.48750114, 0.3808408)
+texture = ExtResource("5_floor")
+region_enabled = true
+region_rect = Rect2(0, 0, 143.62024, 970.33826)
+
+[node name="Floor_Left_3" type="Sprite2D" parent="." unique_id=1013682108]
+position = Vector2(283.91873, 386.11755)
+scale = Vector2(0.4297292, 0.38063657)
+texture = ExtResource("5_floor")
+region_rect = Rect2(0, 0, 900, 370)
+
+[node name="Floor" type="Sprite2D" parent="." unique_id=631322373]
+position = Vector2(1053.9999, 384.99997)
+scale = Vector2(0.42847914, 0.37952927)
+texture = ExtResource("5_floor")
+region_rect = Rect2(0, 0, 900, 370)
+
+[node name="Floor_Left_1" type="Sprite2D" parent="." unique_id=631322374]
+position = Vector2(797.5875, 385.15012)
+scale = Vector2(0.4286251, 0.3796586)
+texture = ExtResource("5_floor")
+region_rect = Rect2(0, 0, 900, 370)
+
+[node name="Floor_Left_2" type="Sprite2D" parent="." unique_id=631322375]
+position = Vector2(541, 386.00003)
+scale = Vector2(0.42945835, 0.38039666)
+texture = ExtResource("5_floor")
+region_rect = Rect2(0, 0, 900, 370)
+
+[node name="Walls" type="Node2D" parent="." unique_id=734950099]
+
+[node name="WallTop" type="Sprite2D" parent="Walls" unique_id=1327219071]
+position = Vector2(345.55, 175.25)
+scale = Vector2(0.41618645, 0.48499998)
+texture = ExtResource("6_wall")
+region_enabled = true
+region_rect = Rect2(0, 0, 1180, 100)
+
+[node name="WallTop" type="Sprite2D" parent="Walls/WallTop" unique_id=2018742281]
+position = Vector2(1418.4814, -0.2693138)
+scale = Vector2(1.002229, 0.9847678)
+texture = ExtResource("6_wall")
+region_enabled = true
+region_rect = Rect2(0, 0, 1180, 100)
+
+[node name="WallLeft" type="Sprite2D" parent="Walls" unique_id=196375476]
+position = Vector2(74.624344, 384.6244)
+rotation = 1.5707964
+scale = Vector2(0.31460652, 0.5075131)
+texture = ExtResource("6_wall")
+region_enabled = true
+region_rect = Rect2(0, 0, 1180, 100)
+
+[node name="WallRight" type="Sprite2D" parent="Walls" unique_id=189215994]
+position = Vector2(1206.127, 384.99997)
+rotation = 1.5707964
+scale = Vector2(0.31906334, 0.5225391)
+texture = ExtResource("6_wall")
+region_enabled = true
+region_rect = Rect2(0, 0, 1180, 100)
+
+[node name="WallBottom" type="Sprite2D" parent="Walls" unique_id=1883263424]
+position = Vector2(347.06403, 593.99994)
+scale = Vector2(0.41853562, 0.4800001)
+texture = ExtResource("6_wall")
+region_enabled = true
+region_rect = Rect2(0, 0, 1180, 100)
+
+[node name="WallBottom" type="Sprite2D" parent="Walls/WallBottom" unique_id=1259636150]
+position = Vector2(1405.5201, 0.5001278)
+scale = Vector2(0.99489653, 0.99000025)
+texture = ExtResource("6_wall")
+region_enabled = true
+region_rect = Rect2(0, 0, 1180, 100)
+
+[node name="DoorTop" type="ColorRect" parent="." unique_id=1007344238]
+offset_left = 590.0
+offset_top = 150.0
+offset_right = 690.0
+offset_bottom = 200.0
+color = Color(0.3, 0.2, 0.15, 1)
+
+[node name="DoorBottom" type="Sprite2D" parent="." unique_id=1531492497]
+z_index = 1
+position = Vector2(642.00006, 586)
+scale = Vector2(0.1819797, 0.18125)
+texture = ExtResource("7_door_close")
+
+[node name="Cabinet" type="Sprite2D" parent="." unique_id=1968680775]
+z_index = 3
+position = Vector2(1150, 250)
+scale = Vector2(0.08, 0.08)
+texture = ExtResource("4_cabinet")
+
+[node name="DoorTop2" type="ColorRect" parent="." unique_id=1473401707]
+offset_left = 593.0
+offset_top = 573.0
+offset_right = 689.0
+offset_bottom = 619.0
+color = Color(0.3, 0.2, 0.15, 1)
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=529530956]
+position = Vector2(640, 360)
+
+[node name="UI" parent="." unique_id=1880367013 instance=ExtResource("2_ui")]
+
+[node name="HUD_Background" parent="UI" index="0" unique_id=732082100]
+offset_left = 107.0
+offset_top = 155.0
+offset_right = 583.0
+offset_bottom = 196.0
+
+[node name="XPLabel" parent="UI" index="1" unique_id=732082138]
+offset_left = 1046.0
+offset_top = 159.0
+offset_right = 1183.0
+offset_bottom = 188.0
+
+[node name="ServedLabel" parent="UI" index="2" unique_id=1564923842]
+offset_left = 112.0
+offset_top = 160.0
+offset_right = 302.0
+offset_bottom = 185.0
+
+[node name="ReputationLabel" parent="UI" index="3" unique_id=933653694]
+offset_left = 369.0
+offset_top = 162.0
+offset_right = 609.0
+offset_bottom = 187.0
+
+[node name="ServiceTimeLabel" parent="UI" index="4" unique_id=933653693]
+offset_left = 863.0
+offset_top = 164.0
+offset_right = 1017.0
+offset_bottom = 189.0
+
+[node name="Boost_Background" parent="UI" index="5" unique_id=645489400]
+offset_left = 745.0
+offset_top = 577.0
+offset_right = 943.0
+offset_bottom = 612.0
+
+[node name="BoostTimerLabel" parent="UI" index="6" unique_id=645489484]
+offset_left = 757.0
+offset_top = 582.0
+offset_right = 937.0
+offset_bottom = 607.0
+
+[node name="MenuButton" parent="UI" index="7" unique_id=658444605]
+offset_left = 109.0
+offset_top = 573.0
+offset_right = 214.0
+offset_bottom = 616.0
+
+[node name="PauseButton" parent="UI" index="8" unique_id=1566267519]
+offset_left = 223.0
+offset_top = 573.0
+offset_right = 328.0
+offset_bottom = 616.0
+
+[node name="ProgressButton" parent="UI" index="9" unique_id=248718353]
+offset_left = 713.0
+offset_top = 156.0
+offset_right = 850.0
+offset_bottom = 194.0
+
+[node name="PauseMenu" parent="UI" index="10" unique_id=925062757]
+offset_left = 435.0
+offset_top = 254.0
+offset_bottom = 457.0
+
+[node name="Background" parent="UI/PauseMenu" index="0" unique_id=1670346414]
+offset_left = 7.0
+offset_top = 7.0
+offset_right = 397.0
+offset_bottom = 197.0
+
+[node name="Title" parent="UI/PauseMenu" index="1" unique_id=235889182]
+offset_left = 126.0
+offset_top = 10.0
+offset_right = 226.0
+offset_bottom = 35.0
+
+[node name="ResumeButton" parent="UI/PauseMenu" index="2" unique_id=282637422]
+offset_left = 95.0
+offset_top = 49.0
+offset_right = 303.0
+offset_bottom = 84.0
+
+[node name="ExitButton" parent="UI/PauseMenu" index="3" unique_id=1507739433]
+offset_left = 95.0
+offset_top = 153.0
+offset_right = 304.0
+offset_bottom = 188.0
+
+[node name="DeleteSaveButton" parent="UI/PauseMenu" index="4" unique_id=1507739434]
+offset_left = 93.0
+offset_top = 100.0
+offset_right = 302.0
+offset_bottom = 131.0
+
+[node name="ProgressPanel" parent="UI" index="11" unique_id=735329906]
+offset_left = 297.0
+offset_top = 209.0
+offset_right = 887.0
+offset_bottom = 559.0
+
+[node name="Background" parent="UI/ProgressPanel" index="0" unique_id=990162865]
+offset_left = 9.0
+offset_top = 31.0
+offset_right = 583.0
+offset_bottom = 343.0
+
+[node name="Tabs" parent="UI/ProgressPanel" index="1" unique_id=929053943]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.044000003
+anchor_top = 0.074
+anchor_right = 0.044000003
+anchor_bottom = 0.074
+offset_left = -9.960016
+offset_top = 11.1
+offset_right = 550.04
+offset_bottom = 318.1
+
+[node name="CloseButton" parent="UI/ProgressPanel" index="2" unique_id=409082688]
+offset_left = 477.0
+offset_top = 37.0
+offset_right = 577.0
+offset_bottom = 68.0
+
+[node name="DecorSlots" type="Node2D" parent="." unique_id=2000000001]
+
+[node name="DecorSlot_Plant" parent="DecorSlots" unique_id=2000000002 instance=ExtResource("3_decor_slot")]
+position = Vector2(506, 226)
+decor_id = "plant"
+
+[node name="DecorSlot_Cooler" parent="DecorSlots" unique_id=2000000003 instance=ExtResource("3_decor_slot")]
+position = Vector2(560, 226)
+decor_id = "cooler"
+
+[node name="DecorSlot_Clock" parent="DecorSlots" unique_id=2000000004 instance=ExtResource("3_decor_slot")]
+position = Vector2(76, 490)
+decor_id = "clock"
+
+[node name="DecorSlot_Trash" parent="DecorSlots" unique_id=2000000005 instance=ExtResource("3_decor_slot")]
+position = Vector2(1153, 543)
+decor_id = "trash"
+
+[node name="DecorSlot_Board" parent="DecorSlots" unique_id=2000000006 instance=ExtResource("3_decor_slot")]
+position = Vector2(511, 594)
+decor_id = "board"
+
+[editable path="UI"]
