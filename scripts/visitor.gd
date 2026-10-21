@@ -66,7 +66,7 @@ func _ready() -> void:
 	# VIP индикатор (звёздочка над головой)
 	if is_vip():
 		vip_indicator = Label.new()
-		vip_indicator.text = "⭐"
+		vip_indicator.text = "*"
 		vip_indicator.offset_left = -10
 		vip_indicator.offset_top = -65
 		vip_indicator.offset_right = 10

@@ -1,7 +1,28 @@
 [gd_scene format=3 uid="uid://ui001"]
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hud"]
+bg_color = Color(0.1, 0.1, 0.15, 0.85)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_left = 8
+corner_radius_bottom_right = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_boost"]
+bg_color = Color(0.1, 0.1, 0.15, 0.85)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_left = 8
+corner_radius_bottom_right = 8
+
 [node name="UI" type="CanvasLayer" unique_id=522531316]
 layer = 10
+
+[node name="HUD_Background" type="Panel" parent="." unique_id=732082100]
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 255.0
+offset_bottom = 125.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_hud")
 
 [node name="XPLabel" type="Label" parent="." unique_id=732082138]
 offset_left = 10.0
@@ -25,7 +46,7 @@ offset_top = 65.0
 offset_right = 250.0
 offset_bottom = 90.0
 theme_override_font_sizes/font_size = 14
-text = "Репутация: 50 ★★★☆☆"
+text = "Репутация: 50 ***--"
 
 [node name="ServiceTimeLabel" type="Label" parent="." unique_id=933653693]
 offset_left = 10.0
@@ -34,6 +55,13 @@ offset_right = 200.0
 offset_bottom = 120.0
 theme_override_font_sizes/font_size = 14
 text = "Время: 180 сек"
+
+[node name="Boost_Background" type="Panel" parent="." unique_id=645489400]
+offset_left = 215.0
+offset_top = 35.0
+offset_right = 405.0
+offset_bottom = 70.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_boost")
 
 [node name="BoostTimerLabel" type="Label" parent="." unique_id=645489484]
 offset_left = 220.0
@@ -47,21 +75,21 @@ offset_left = 10.0
 offset_top = 680.0
 offset_right = 100.0
 offset_bottom = 710.0
-text = "☰"
+text = "[=]"
 
 [node name="PauseButton" type="Button" parent="." unique_id=1566267519]
 offset_left = 1170.0
 offset_top = 680.0
 offset_right = 1270.0
 offset_bottom = 710.0
-text = "⏸"
+text = "||"
 
 [node name="ProgressButton" type="Button" parent="." unique_id=248718353]
 offset_left = 540.0
 offset_top = 10.0
 offset_right = 740.0
 offset_bottom = 35.0
-text = "📊 Прогресс"
+text = ">>> Прогресс"
 
 [node name="PauseMenu" type="Panel" parent="." unique_id=925062757]
 visible = false
@@ -110,7 +138,7 @@ offset_left = 125.0
 offset_top = 175.0
 offset_right = 275.0
 offset_bottom = 205.0
-text = "🗑 Удалить сохранение"
+text = "[X] Удалить сохранение"
 
 [node name="ProgressPanel" type="Panel" parent="." unique_id=735329906]
 visible = false

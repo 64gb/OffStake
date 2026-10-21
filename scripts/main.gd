@@ -20,6 +20,9 @@ const DECOR_TEXTURES = {
 	"board": preload("res://assets/office/доска_декор.png"),
 }
 
+const DOOR_CLOSE_TEX = preload("res://assets/office/door_close.png")
+const DOOR_OPEN_TEX = preload("res://assets/office/door_open.png")
+
 const CHAIR_WAITING_TEX = preload("res://assets/office/стул посетителя в очереди.png")
 
 # Масштаб для каждого декора (подгонка под размер игры)
@@ -34,6 +37,11 @@ const DECOR_SCALES = {
 # Позиции
 var DOOR_TOP = Vector2(640, 180)
 var DOOR_BOTTOM = Vector2(640, 650)
+var door_bottom_node: Sprite2D = null  # Нода нижней двери для анимации
+var door_open: bool = false  # Состояние двери
+var door_close_timer: float = 0.0  # Таймер до закрытия
+var DOOR_ZONE_Y_MIN: float = 555.0  # Верхняя граница зоны двери
+var DOOR_ZONE_Y_MAX: float = 600.0  # Нижняя граница зоны двери
 var WINDOW_POS = Vector2(800, 300)
 var EMPLOYEE_CHAIR = Vector2(800, 270)
 var VISITOR_CHAIR = Vector2(800, 330)
@@ -49,7 +57,7 @@ var waiting_chairs: Array[Node] = []
 var windows: Array[ServiceWindow] = []  # Массив окон приёма
 
 # Прогресс
-var xp: int = 100000  # Начальное XP
+var xp: int = 100  # Начальное XP
 var served_count: int = 0
 var reputation: int = 50  # Репутация (0-100)
 var left_count: int = 0  # Сколько посетителей ушло
@@ -72,8 +80,9 @@ var system_quality_costs: Array[int] = [3, 6, 12, 24, 48]
 var system_upgrade: Array[bool] = [false, false, false, false, false]
 var system_upgrade_costs: Array[int] = [10, 20, 40, 60, 80]
 
-# Бусты (временные ускорения)
-var active_boosts: Dictionary = {}  # {boost_id: time_remaining}
+# Бусты (временные ускорения) — может быть активен только один
+var active_boost: String = ""  # ID текущего активного буста
+var active_boost_time: float = 0.0  # Оставшееся время
 var boost_definitions: Dictionary = {
 	"coffee": {"name": "Кофе", "cost": 20, "multiplier": 0.8, "duration": 60.0},
 	"energy": {"name": "Энергетик", "cost": 40, "multiplier": 0.6, "duration": 120.0},
@@ -283,6 +292,13 @@ func _ready() -> void:
 	add_child(infomat)
 	infomat.position = INFOMAT_POS  # (550, 520) - внутри офиса
 
+	# Находим ноду нижней двери для анимации
+	door_bottom_node = get_node_or_null("DoorBottom")
+	if door_bottom_node:
+		print("[ДВЕРЬ] Нода найдена")
+	else:
+		print("[ДВЕРЬ] ОШИБКА: DoorBottom не найдена!")
+
 	# Узел для уведомлений о событиях
 	active_event_notification = Label.new()
 	active_event_notification.offset_left = 110
@@ -491,7 +507,7 @@ func _on_pause_pressed() -> void:
 	# Меняем текст кнопки
 	var pause_btn = get_node_or_null("UI/PauseButton")
 	if pause_btn:
-		pause_btn.text = "▶" if game_paused else "⏸"
+		pause_btn.text = ">|" if game_paused else "||"
 	
 	print("Пауза: ", game_paused)
 
@@ -525,7 +541,7 @@ func _on_resume_pressed() -> void:
 	# Кнопка паузы показывает "пауза"
 	var pause_btn = get_node_or_null("UI/PauseButton")
 	if pause_btn:
-		pause_btn.text = "⏸"
+		pause_btn.text = "||"
 
 func _on_exit_pressed() -> void:
 	print("Выйти нажато! Выход из игры...")
@@ -609,13 +625,13 @@ func _fill_system_tab(ui: Node) -> void:
 			upgrade_count += 1
 	
 	var bonus_parts: PackedStringArray = []
-	bonus_parts.append("⏱ %.0f сек" % service_time)
+	bonus_parts.append("[T] %.0f сек" % service_time)
 	if quality_count > 0:
-		bonus_parts.append("🔧 -%d сек" % quality_count)
+		bonus_parts.append("[F] -%d сек" % quality_count)
 	if upgrade_count > 0:
-		bonus_parts.append("🔄 -%d сек" % (upgrade_count * 5))
+		bonus_parts.append("[R] -%d сек" % (upgrade_count * 5))
 	if bonus_parts.size() <= 1 and quality_count == 0 and upgrade_count == 0:
-		bonus_parts.append("📦 без улучшений")
+		bonus_parts.append("[N] без улучшений")
 	
 	var bonus_panel = Panel.new()
 	bonus_panel.custom_minimum_size = Vector2(480, 30)
@@ -651,13 +667,13 @@ func _fill_system_tab(ui: Node) -> void:
 		level_btn.offset_bottom = 30
 		
 		if i < system_level:
-			level_btn.text = "✓ %s" % level_data.name
+			level_btn.text = "OK %s" % level_data.name
 			level_btn.disabled = true
 		elif is_current:
-			level_btn.text = "▶ %s (Текущая)" % level_data.name
+			level_btn.text = "> %s (Текущая)" % level_data.name
 			level_btn.disabled = true
 		else:
-			level_btn.text = "▶ %s - %d XP" % [level_data.name, level_data.cost]
+			level_btn.text = "> %s - %d XP" % [level_data.name, level_data.cost]
 			if xp < level_data.cost:
 				level_btn.disabled = true
 			else:
@@ -681,7 +697,7 @@ func _fill_system_tab(ui: Node) -> void:
 			
 			# Заголовок панели улучшений
 			var panel_header = Label.new()
-			panel_header.text = "⚙ Улучшения системы"
+			panel_header.text = "[G] Улучшения системы"
 			panel_header.offset_left = 15
 			panel_header.offset_top = 0
 			panel_header.offset_right = 465
@@ -719,7 +735,7 @@ func _fill_system_tab(ui: Node) -> void:
 			var next_slot = _get_next_available_slot(system_quality)
 			if next_slot >= 0:
 				var cost = system_quality_costs[next_slot] * q_cost_mult
-				q_buy_btn.text = "🛒 Купить за %d XP" % cost
+				q_buy_btn.text = "[B] Купить за %d XP" % cost
 				if xp < cost:
 					q_buy_btn.disabled = true
 				else:
@@ -759,7 +775,7 @@ func _fill_system_tab(ui: Node) -> void:
 			next_slot = _get_next_available_slot(system_upgrade)
 			if next_slot >= 0:
 				var cost = system_upgrade_costs[next_slot] * pow(2, system_level)
-				u_buy_btn.text = "🛒 Купить за %d XP" % cost
+				u_buy_btn.text = "[B] Купить за %d XP" % cost
 				if xp < cost:
 					u_buy_btn.disabled = true
 				else:
@@ -816,7 +832,7 @@ func _fill_queue_tab(ui: Node) -> void:
 		if upgrade.purchased:
 			if i == last_purchased_index:
 				# Последнее купленное — показываем галочку
-				btn.text = "%d стульев ✓" % upgrade.chairs
+				btn.text = "%d стульев OK" % upgrade.chairs
 			else:
 				# Куплено, но не последнее — без галочки
 				btn.text = "%d стульев" % upgrade.chairs
@@ -848,31 +864,26 @@ func _fill_boosts_tab(ui: Node) -> void:
 	for child in content.get_children():
 		child.queue_free()
 
-	# Панель активных бустов (сверху)
+	# Панель активного буста (сверху)
 	var active_bonus_panel = Panel.new()
 	active_bonus_panel.custom_minimum_size = Vector2(480, 35)
 	content.add_child(active_bonus_panel)
-	
+
 	var active_label = Label.new()
 	active_label.offset_left = 10
 	active_label.offset_top = 5
 	active_label.offset_right = 470
 	active_label.offset_bottom = 30
 	active_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	
-	if active_boosts.size() > 0:
-		var boost_lines: PackedStringArray = []
-		var total_mult = 1.0
-		for bid in active_boosts.keys():
-			var b = boost_definitions[bid]
-			boost_lines.append("%s: %.0f сек" % [b.name, active_boosts[bid]])
-			total_mult *= b.multiplier
-		active_label.text = "⚡ АКТИВНЫ: " + " | ".join(boost_lines) + "\nМножитель: x%.2f" % (1.0 - total_mult)
+
+	if active_boost != "":
+		var b = boost_definitions[active_boost]
+		active_label.text = "[!] АКТИВЕН: %s — %.0f сек\nМножитель: x%.2f" % [b.name, active_boost_time, 1.0 - b.multiplier]
 		active_label.add_theme_color_override("font_color", Color(1, 0.9, 0.3, 1))
 	else:
-		active_label.text = "⚡ Нет активных бустов"
+		active_label.text = "[!] Нет активного буста"
 		active_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7, 1))
-	
+
 	active_label.add_theme_font_size_override("font_size", 12)
 	active_bonus_panel.add_child(active_label)
 
@@ -887,11 +898,18 @@ func _fill_boosts_tab(ui: Node) -> void:
 		btn.offset_right = 470
 		btn.offset_bottom = y_offset + 35
 
-		# Проверяем активен ли буст
-		var is_active = boost_id in active_boosts
+		# Проверяем активен ли этот буст
+		var is_active = (active_boost == boost_id)
 		if is_active:
-			btn.text = "%s ✓ (%d сек)" % [boost.name, int(active_boosts[boost_id])]
+			btn.text = "%s OK (%.0f сек)" % [boost.name, active_boost_time]
 			btn.disabled = true
+		elif active_boost != "":
+			# Другой буст активен — показываем что заменит
+			btn.text = "%s - %d XP (%d сек) [заменит %s]" % [boost.name, boost.cost, int(boost.duration), boost_definitions[active_boost].name]
+			if xp < boost.cost:
+				btn.disabled = true
+			else:
+				btn.pressed.connect(_on_activate_boost.bind(boost_id))
 		else:
 			btn.text = "%s - %d XP (%d сек)" % [boost.name, boost.cost, int(boost.duration)]
 			if xp < boost.cost:
@@ -933,7 +951,7 @@ func _fill_employees_tab(ui: Node) -> void:
 		hire_btn.offset_top = 40
 		hire_btn.offset_right = 470
 		hire_btn.offset_bottom = 75
-		hire_btn.text = "👥 Нанять сотрудника - %d XP" % employee_cost
+		hire_btn.text = "[+] Нанять сотрудника - %d XP" % employee_cost
 		
 		if xp < employee_cost:
 			hire_btn.disabled = true
@@ -983,14 +1001,14 @@ func _fill_decor_tab(ui: Node) -> void:
 		bonus_label.text = "🏢 Бонусы: " + bonus_text
 		bonus_label.add_theme_color_override("font_color", Color(0.7, 0.9, 0.7, 1))
 	else:
-		bonus_label.text = "🏢 Купите декор для бонусов"
+		bonus_label.text = "[O] Купите декор для бонусов"
 		bonus_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7, 1))
 	bonus_label.add_theme_font_size_override("font_size", 12)
 	decor_bonus_panel.add_child(bonus_label)
 
 	# Заголовок
 	var label = Label.new()
-	label.text = "🏢 Декор офиса"
+	label.text = "[O] Декор офиса"
 	label.offset_left = 10
 	label.offset_top = 5
 	label.offset_right = 470
@@ -1222,6 +1240,8 @@ func _spawn_visitor() -> void:
 	add_child(visitor)
 	visitor.position = DOOR_BOTTOM
 
+	# Дверь открывается автоматически по позиции посетителя (см. _process)
+
 	# Репутация влияет на типы: выше репутация → больше сложных (больше XP)
 	var simple_chance = lerp(0.65, 0.30, reputation / 100.0)
 	var medium_chance = lerp(0.30, 0.35, reputation / 100.0)
@@ -1356,6 +1376,46 @@ func _go_home(visitor: Visitor) -> void:
 	# 🟣 ФИОЛЕТОВЫЙ маршрут: инфомат → дверь (уход)
 	visitor.go_to_door(DOOR_BOTTOM)
 	visitor.on_reached_callback = func(): _remove_visitor(visitor)
+
+# Анимация двери — открытие
+func _door_open_anim() -> void:
+	if not door_bottom_node:
+		return
+	door_bottom_node.texture = DOOR_OPEN_TEX
+	door_open = true
+
+# Анимация двери — закрытие
+func _door_close_anim() -> void:
+	if not door_bottom_node:
+		return
+	door_bottom_node.texture = DOOR_CLOSE_TEX
+	door_open = false
+
+# Автоматическое открытие/закрытие двери по позиции посетителей
+func _update_door_by_visitors(delta: float) -> void:
+	if not door_bottom_node:
+		return
+
+	var visitor_in_zone = false
+	var all_visitors = get_tree().get_nodes_in_group("visitors")
+	for v in all_visitors:
+		if is_instance_valid(v):
+			# Проверяем Y-координату: в зоне двери?
+			var vy = v.global_position.y
+			if vy >= DOOR_ZONE_Y_MIN and vy <= DOOR_ZONE_Y_MAX:
+				visitor_in_zone = true
+				break
+
+	if visitor_in_zone:
+		# Посетитель в зоне — открываем дверь и сбрасываем таймер
+		door_close_timer = 1.0
+		if not door_open:
+			_door_open_anim()
+	else:
+		# Никого нет в зоне — уменьшаем таймер
+		door_close_timer -= delta
+		if door_close_timer <= 0.0 and door_open:
+			_door_close_anim()
 
 func _in_queue(visitor: Visitor) -> void:
 	visitor.state = "waiting"
@@ -1535,7 +1595,7 @@ func _employee_at_cabinet(employee: Node) -> void:
 	var total_xp = int(xp_reward * decor_bonus)
 	xp += total_xp
 	_update_ui()
-	var vip_tag = " ⭐VIP" if is_vip else ""
+	var vip_tag = " *VIP" if is_vip else ""
 	print("XP: %d (+%d за тип %s%s%s)" % [xp, total_xp, ["Простой", "Средний", "Сложный"][visitor_type], vip_tag,
 		" (декор x%.0f%%)" % (decor_bonus * 100) if decor_bonus > 1.0 else ""])
 
@@ -1626,25 +1686,24 @@ func _update_ui() -> void:
 		served_label.text = "Обслужено: %d" % served_count
 	if rep_label:
 		var stars = ""
-		if reputation >= 90: stars = "★★★★★"
-		elif reputation >= 70: stars = "★★★★☆"
-		elif reputation >= 50: stars = "★★★☆☆"
-		elif reputation >= 30: stars = "★★☆☆☆"
-		else: stars = "★☆☆☆☆"
+		if reputation >= 90: stars = "*****"
+		elif reputation >= 70: stars = "****-"
+		elif reputation >= 50: stars = "***--"
+		elif reputation >= 30: stars = "**---"
+		else: stars = "*----"
 		rep_label.text = "Репутация: %d %s" % [reputation, stars]
 	if service_time_label:
 		var service_time = get_service_time()
 		service_time_label.text = "Время: %.0f сек" % service_time
 	if boost_timer_label:
-		# Показываем активные бусты
-		var boost_texts = []
-		for boost_id in active_boosts.keys():
-			if boost_id in boost_definitions:
-				boost_texts.append("%s: %.0f" % [
-					boost_definitions[boost_id].name,
-					active_boosts[boost_id]
-				])
-		boost_timer_label.text = " | ".join(boost_texts) if boost_texts else ""
+		# Показываем активный буст
+		if active_boost != "" and active_boost in boost_definitions:
+			boost_timer_label.text = "%s: %.0f" % [
+				boost_definitions[active_boost].name,
+				active_boost_time
+			]
+		else:
+			boost_timer_label.text = ""
 	
 	# Обновляем панель прогресса если открыта
 	var progress_panel = ui.get_node_or_null("ProgressPanel")
@@ -1660,14 +1719,13 @@ func _update_boost_ui() -> void:
 	# 1. Обновляем BoostTimerLabel в главном HUD
 	var boost_timer_label = ui.get_node_or_null("BoostTimerLabel")
 	if boost_timer_label:
-		var boost_texts = []
-		for boost_id in active_boosts.keys():
-			if boost_id in boost_definitions:
-				boost_texts.append("%s: %.0f" % [
-					boost_definitions[boost_id].name,
-					active_boosts[boost_id]
-				])
-		boost_timer_label.text = " | ".join(boost_texts) if boost_texts else ""
+		if active_boost != "" and active_boost in boost_definitions:
+			boost_timer_label.text = "%s: %.0f" % [
+				boost_definitions[active_boost].name,
+				active_boost_time
+			]
+		else:
+			boost_timer_label.text = ""
 
 	# 2. Обновляем вкладку "Бусты" если панель прогресса открыта
 	var progress_panel = ui.get_node_or_null("ProgressPanel")
@@ -1691,12 +1749,11 @@ func get_service_time() -> float:
 		if system_upgrade[i]:
 			base_time -= 5.0
 	
-	# Бусты (множитель)
+	# Буст (множитель, только один)
 	var boost_multiplier = 1.0
-	for boost_id in active_boosts.keys():
-		if boost_id in boost_definitions:
-			boost_multiplier *= boost_definitions[boost_id].multiplier
-	
+	if active_boost != "" and active_boost in boost_definitions:
+		boost_multiplier = boost_definitions[active_boost].multiplier
+
 	base_time *= boost_multiplier
 	
 	return max(base_time, 5.0)  # Минимум 5 секунд
@@ -1711,9 +1768,18 @@ func activate_boost(boost_id: String) -> bool:
 
 	xp -= boost.cost
 
-	# Добавляем или обновляем буст
-	active_boosts[boost_id] = boost.duration
-	print("  Буст активирован: %s на %.0f сек" % [boost.name, boost.duration])
+	# Заменяем старый буст на новый (если был активен — теряется)
+	var old_name = ""
+	if active_boost != "" and active_boost in boost_definitions:
+		old_name = boost_definitions[active_boost].name
+
+	active_boost = boost_id
+	active_boost_time = boost.duration
+
+	if old_name != "":
+		print("  Буст заменён: %s → %s на %.0f сек" % [old_name, boost.name, boost.duration])
+	else:
+		print("  Буст активирован: %s на %.0f сек" % [boost.name, boost.duration])
 
 	return true
 
@@ -1762,12 +1828,17 @@ func purchase_upgrade(slot: int) -> bool:
 	return true
 
 func _process(delta: float) -> void:
-	# Обновляем таймеры бустов (даже на паузе)
-	for boost_id in active_boosts.keys():
-		active_boosts[boost_id] -= delta
-		if active_boosts[boost_id] <= 0:
-			active_boosts.erase(boost_id)
-			print("  Буст закончился: %s" % boost_definitions[boost_id].name)
+	# Обновляем дверь по позиции посетителей (даже на паузе)
+	_update_door_by_visitors(delta)
+
+	# Обновляем таймер буста (даже на паузе)
+	if active_boost != "":
+		active_boost_time -= delta
+		if active_boost_time <= 0:
+			var ended_name = boost_definitions[active_boost].name if active_boost in boost_definitions else active_boost
+			active_boost = ""
+			active_boost_time = 0.0
+			print("  Буст закончился: %s" % ended_name)
 
 	# Обновляем UI бустов каждые 0.5 сек (если панель прогресса открыта)
 	boost_ui_timer += delta
@@ -1892,12 +1963,12 @@ func _check_achievements() -> void:
 
 	for ach_id in new_achs:
 		var data = achievements_system.get_achievement_data(ach_id)
-		print("🏆 ДОСТИЖЕНИЕ: %s — %s (+%d XP)" % [data.name, data.desc, data.xp_reward])
+		print("[ACH] ДОСТИЖЕНИЕ: %s — %s (+%d XP)" % [data.name, data.desc, data.xp_reward])
 		xp += data.xp_reward
 
 		# Показываем уведомление
 		if active_event_notification:
-			active_event_notification.text = "🏆 %s — %s (+%d XP)" % [data.name, data.desc, data.xp_reward]
+			active_event_notification.text = "[ACH] %s — %s (+%d XP)" % [data.name, data.desc, data.xp_reward]
 			active_event_notification.add_theme_color_override("font_color", Color(1, 0.85, 0, 1))
 			active_event_notification.visible = true
 			await get_tree().create_timer(8.0).timeout
@@ -1931,7 +2002,7 @@ func _trigger_event(event: Dictionary) -> void:
 		elif event.type == "bad":
 			color = Color(1, 0.4, 0.4, 1)  # Красный
 
-		active_event_notification.text = "📢 %s — %s" % [event.name, event.text]
+		active_event_notification.text = "[EV] %s — %s" % [event.name, event.text]
 		active_event_notification.add_theme_color_override("font_color", color)
 		active_event_notification.visible = true
 

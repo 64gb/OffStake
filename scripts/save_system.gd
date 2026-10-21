@@ -5,7 +5,7 @@ const SAVE_PATH = "user://savegame.json"
 
 # Все сохраняемые данные
 static var data: Dictionary = {
-	"xp": 100000,
+	"xp": 100,
 	"served_count": 0,
 	"reputation": 50,
 	"left_count": 0,
@@ -109,7 +109,7 @@ static func delete_save() -> bool:
 ## Сбросить данные на начальные
 static func reset_data() -> void:
 	data = {
-		"xp": 100000,
+		"xp": 100,
 		"served_count": 0,
 		"reputation": 50,
 		"left_count": 0,

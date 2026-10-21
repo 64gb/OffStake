@@ -3,35 +3,35 @@
 # Определения декора
 var decor_definitions: Dictionary = {
 	"plant": {
-		"name": "🌿 Растение",
+		"name": "[P] Растение",
 		"desc": "Живое растение в горшке",
 		"cost": 20,
 		"color": Color(0.2, 0.7, 0.2, 1),
 		"size": Vector2(30, 50)
 	},
 	"cooler": {
-		"name": "💧 Кулер",
+		"name": "[B] Кулер",
 		"desc": "Кулер с водой",
 		"cost": 30,
 		"color": Color(0.3, 0.6, 0.9, 1),
 		"size": Vector2(25, 55)
 	},
 	"clock": {
-		"name": "🕐 Часы",
+		"name": "[T] Часы",
 		"desc": "Настенные часы",
 		"cost": 25,
 		"color": Color(0.9, 0.9, 0.9, 1),
 		"size": Vector2(35, 35)
 	},
 	"trash": {
-		"name": "🗑 Урна",
+		"name": "[U] Урна",
 		"desc": "Мусорная урна",
 		"cost": 10,
 		"color": Color(0.5, 0.5, 0.5, 1),
 		"size": Vector2(25, 35)
 	},
 	"board": {
-		"name": "📋 Стенд",
+		"name": "[S] Стенд",
 		"desc": "Информационный стенд",
 		"cost": 40,
 		"color": Color(0.8, 0.7, 0.4, 1),
@@ -108,11 +108,11 @@ func get_bonus_description() -> String:
 	var parts: PackedStringArray = []
 	var rep_bonus = get_reputation_bonus()
 	if rep_bonus > 0:
-		parts.append("🏆 +%d репутации" % rep_bonus)
+		parts.append("[R] +%d репутации" % rep_bonus)
 	var xp_bonus = int(get_xp_bonus_multiplier() * 100) - 100
 	if xp_bonus > 0:
-		parts.append("💰 +%d%% XP" % xp_bonus)
+		parts.append("[X] +%d%% XP" % xp_bonus)
 	var pat_bonus = get_patience_bonus_seconds()
 	if pat_bonus > 0:
-		parts.append("⏰ +%d сек терпения" % pat_bonus)
+		parts.append("[T] +%d сек терпения" % pat_bonus)
 	return " | ".join(parts)
